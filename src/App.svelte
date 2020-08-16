@@ -45,33 +45,48 @@
     // 記録情報で認証
     const userToken = window.localStorage.getItem("USER_TOKEN") ?? "";
     const userSecret = window.localStorage.getItem("USER_SECRET") ?? "";
-    let client = new Twitter({
-      consumer_key: consumerKey,
-      consumer_secret: consumerSecret,
-      access_token_key: userToken,
-      access_token_secret: userSecret,
-    });
-    let result = await client.getBearerToken();
-
-    // 記録情報がNGなら認証
-    if (result.access_token == null) {
-      state = _STATE.REQUIRE;
-      client = new Twitter({
+    let cred = null;
+    if (userToken !== "" && userSecret !== "") {
+      const client = new Twitter({
         consumer_key: consumerKey,
         consumer_secret: consumerSecret,
+        access_token_key: userToken,
+        access_token_secret: userSecret,
       });
-      let tokenReponse = await client.getRequestToken("https://google.com");
-
-      if (result.access_token == null) {
-        state = _STATE.ERROR;
-        error = "認証に失敗しました。";
-        return;
+      try {
+        cred = await client.get("account/verify_credentials");
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    if (userToken == null || userSecret == null) {
-      //
+    if (cred === null) {
+      const client = new Twitter({
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret,
+      });
+      const res = await client.getRequestToken("http://callbackurl.com");
     }
+
+    // 記録情報がNGなら認証
+    // if (result.access_token == null) {
+    //   state = _STATE.REQUIRE;
+    //   client = new Twitter({
+    //     consumer_key: consumerKey,
+    //     consumer_secret: consumerSecret,
+    //   });
+    //   let tokenReponse = await client.getRequestToken("https://google.com");
+
+    //   if (result.access_token == null) {
+    //     state = _STATE.ERROR;
+    //     error = "認証に失敗しました。";
+    //     return;
+    //   }
+    // }
+
+    // if (userToken == null || userSecret == null) {
+    //   //
+    // }
 
     text.focus();
   });
