@@ -7,7 +7,6 @@ import autoPreprocess from 'svelte-preprocess'
 import { scss, typescript } from 'svelte-preprocess'
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
-import json from 'rollup-plugin-json';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -68,8 +67,7 @@ export default {
 		commonjs(),
 
 		globals(),
-		json(),
-		builtins({ crypto: true }),
+		builtins(),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
