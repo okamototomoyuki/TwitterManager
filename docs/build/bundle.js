@@ -53463,7 +53463,7 @@ var pVersionMajor;     {
     	return child_ctx;
     }
 
-    // (154:8) {#each tweet.text.split(/(\n)/) as line}
+    // (198:8) {#each tweet.text.split(/(\n)/) as line}
     function create_each_block_1(ctx) {
     	let div;
     	let t_value = /*line*/ ctx[17] + "";
@@ -53473,7 +53473,7 @@ var pVersionMajor;     {
     		c: function create() {
     			div = element("div");
     			t = text(t_value);
-    			add_location(div, file, 154, 10, 4774);
+    			add_location(div, file, 198, 10, 6432);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -53491,14 +53491,14 @@ var pVersionMajor;     {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(154:8) {#each tweet.text.split(/(\\n)/) as line}",
+    		source: "(198:8) {#each tweet.text.split(/(\\n)/) as line}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (151:2) {#each filters as tweet}
+    // (195:2) {#each filters as tweet}
     function create_each_block(ctx) {
     	let div2;
     	let div0;
@@ -53530,12 +53530,12 @@ var pVersionMajor;     {
     			a = element("a");
     			t1 = text("▶");
     			t2 = space();
-    			add_location(div0, file, 152, 6, 4709);
+    			add_location(div0, file, 196, 6, 6367);
     			attr_dev(a, "href", a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str);
-    			add_location(a, file, 158, 8, 4841);
-    			add_location(div1, file, 157, 6, 4827);
-    			attr_dev(div2, "class", "tweet svelte-1yrolg1");
-    			add_location(div2, file, 151, 4, 4683);
+    			add_location(a, file, 202, 8, 6499);
+    			add_location(div1, file, 201, 6, 6485);
+    			attr_dev(div2, "class", "tweet svelte-1e5k84m");
+    			add_location(div2, file, 195, 4, 6341);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -53590,7 +53590,7 @@ var pVersionMajor;     {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(151:2) {#each filters as tweet}",
+    		source: "(195:2) {#each filters as tweet}",
     		ctx
     	});
 
@@ -53599,7 +53599,7 @@ var pVersionMajor;     {
 
     function create_fragment(ctx) {
     	let main;
-    	let textarea;
+    	let div;
     	let t;
     	let each_value = /*filters*/ ctx[5];
     	validate_each_argument(each_value);
@@ -53612,24 +53612,25 @@ var pVersionMajor;     {
     	const block = {
     		c: function create() {
     			main = element("main");
-    			textarea = element("textarea");
+    			div = element("div");
     			t = space();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(textarea, "class", "svelte-1yrolg1");
-    			add_location(textarea, file, 149, 2, 4622);
-    			add_location(main, file, 148, 0, 4613);
+    			attr_dev(div, "class", "textarea svelte-1e5k84m");
+    			attr_dev(div, "contenteditable", "true");
+    			add_location(div, file, 193, 2, 6245);
+    			add_location(main, file, 192, 0, 6236);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
-    			append_dev(main, textarea);
-    			/*textarea_binding*/ ctx[6](textarea);
+    			append_dev(main, div);
+    			/*div_binding*/ ctx[6](div);
     			append_dev(main, t);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -53665,7 +53666,7 @@ var pVersionMajor;     {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
-    			/*textarea_binding*/ ctx[6](null);
+    			/*div_binding*/ ctx[6](null);
     			destroy_each(each_blocks, detaching);
     		}
     	};
@@ -53753,22 +53754,22 @@ var pVersionMajor;     {
     		// 追加収集関数作成
     		let prevId = 0;
 
+    		if (tweets.length > 0) {
+    			prevId = parseInt(tweets[0].id_str);
+    		}
+
     		let addTweet = async () => {
     			const param = { count: 1 };
     			const adds = await client.get("statuses/user_timeline", param);
 
     			if (adds.length == 1) {
     				const id = parseInt(adds[0].id_str);
-    				console.info(`${id}  ${prevId}`);
 
     				if (id > prevId) {
-    					console.info(0);
     					prevId = id;
     					tweets = adds.concat(tweets);
     				}
     			}
-
-    			console.info(1);
 
     			// スレッドが指定されたらそのスレッドの情報だけ取得
     			if (threadId.length > 0) {
@@ -53801,7 +53802,6 @@ var pVersionMajor;     {
     					}
     				}
     			} else {
-    				console.info(2);
     				$$invalidate(5, filters = tweets);
     			}
     		};
@@ -53809,8 +53809,18 @@ var pVersionMajor;     {
     		document.addEventListener("keydown", async function (e) {
     			if (e.code == "Enter" && e.ctrlKey) {
     				e.preventDefault();
-    				const v = text.value;
-    				$$invalidate(0, text.value = "", text);
+    				const v = text.innerText;
+
+    				// TODO 画像投稿
+    				// ※ Twitter Lite が未対応
+    				// const imgs = text.getElementsByTagName("img");
+    				// console.info(imgs.length);
+    				// for (const img of imgs) {
+    				// const param = { media_data: img.src };
+    				// const res = await client.post("media/upload", param);
+    				// console.log(res);
+    				// }
+    				$$invalidate(0, text.innerText = "", text);
 
     				const param = {
     					status: v,
@@ -53825,6 +53835,60 @@ var pVersionMajor;     {
     				addTweet();
     			}
     		});
+
+    		document.addEventListener("dragover", e => e.preventDefault(), false);
+    		document.addEventListener("drop", e => e.preventDefault(), false);
+
+    		//ドロップした時の挙動
+    		document.addEventListener(
+    			"drop",
+    			e => {
+    				//現在のカーソル位置
+    				e.preventDefault();
+
+    				//DataTransfer オブジェクト、ファイルリストを取得する
+    				var files = e.dataTransfer?.files;
+
+    				if (!files) {
+    					return;
+    				}
+
+    				for (var i = 0; i < files.length; i++) {
+    					//ファイルを取得する
+    					if (!files[i].type.match("image.*")) {
+    						alert("画像をアップしてください");
+    						return;
+    					}
+
+    					var reader = new FileReader();
+
+    					//エラー処理
+    					reader.addEventListener(
+    						"error",
+    						e2 => {
+    							console.log("error" + e2?.target?.error?.code);
+    						},
+    						false
+    					);
+
+    					//読み込み後の処理
+    					reader.addEventListener(
+    						"load",
+    						e2 => {
+    							const img = document.createElement("img");
+    							img.src = e2?.target?.result;
+    							img.width = 64;
+    							img.height = 64;
+    							text.appendChild(img);
+    						},
+    						false
+    					);
+
+    					reader.readAsDataURL(files[i]);
+    				}
+    			},
+    			false
+    		);
 
     		text.focus();
     		addTweet();
@@ -53844,7 +53908,7 @@ var pVersionMajor;     {
     	let { $$slots = {}, $$scope } = $$props;
     	validate_slots("App", $$slots, []);
 
-    	function textarea_binding($$value) {
+    	function div_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			text = $$value;
     			$$invalidate(0, text);
@@ -53897,7 +53961,7 @@ var pVersionMajor;     {
     		accessTokenKey,
     		accessTokenSecret,
     		filters,
-    		textarea_binding
+    		div_binding
     	];
     }
 

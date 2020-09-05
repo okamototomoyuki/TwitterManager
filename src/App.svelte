@@ -13,7 +13,7 @@
 
   let state: _STATE;
   let error: String;
-  let text: HTMLTextAreaElement;
+  let text: HTMLDivElement;
 
   let consumerKey: string;
   let consumerSecret: string;
@@ -77,20 +77,20 @@
 
     // 追加収集関数作成
     let prevId = 0;
+    if (tweets.length > 0) {
+      prevId = parseInt(tweets[0].id_str);
+    }
     let addTweet = async () => {
       const param = { count: 1 };
       const adds = await client.get("statuses/user_timeline", param);
       if (adds.length == 1) {
         const id = parseInt(adds[0].id_str);
-        console.info(`${id}  ${prevId}`);
         if (id > prevId) {
-          console.info(0);
           prevId = id;
           tweets = adds.concat(tweets);
         }
       }
 
-      console.info(1);
       // スレッドが指定されたらそのスレッドの情報だけ取得
       if (threadId.length > 0) {
         filters = [];
@@ -123,7 +123,6 @@
           }
         }
       } else {
-        console.info(2);
         filters = tweets;
       }
     };
@@ -132,8 +131,19 @@
       if (e.code == "Enter" && e.ctrlKey) {
         e.preventDefault();
 
-        const v = text.value;
-        text.value = "";
+        const v = text.innerText;
+
+        // TODO 画像投稿
+        // ※ Twitter Lite が未対応
+        // const imgs = text.getElementsByTagName("img");
+        // console.info(imgs.length);
+        // for (const img of imgs) {
+        // const param = { media_data: img.src };
+        // const res = await client.post("media/upload", param);
+        // console.log(res);
+        // }
+
+        text.innerText = "";
 
         const param = {
           status: v,
@@ -150,6 +160,52 @@
       }
     });
 
+    document.addEventListener("dragover", (e) => e.preventDefault(), false);
+    document.addEventListener("drop", (e) => e.preventDefault(), false);
+    //ドロップした時の挙動
+    document.addEventListener(
+      "drop",
+      (e) => {
+        //現在のカーソル位置
+        e.preventDefault();
+        //DataTransfer オブジェクト、ファイルリストを取得する
+        var files = e.dataTransfer?.files;
+        if (!files) {
+          return;
+        }
+        for (var i = 0; i < files.length; i++) {
+          //ファイルを取得する
+          if (!files[i].type.match("image.*")) {
+            alert("画像をアップしてください");
+            return;
+          }
+          var reader = new FileReader();
+          //エラー処理
+          reader.addEventListener(
+            "error",
+            (e2) => {
+              console.log("error" + e2?.target?.error?.code);
+            },
+            false
+          );
+          //読み込み後の処理
+          reader.addEventListener(
+            "load",
+            (e2) => {
+              const img = document.createElement("img");
+              img.src = e2?.target?.result as string;
+              img.width = 64;
+              img.height = 64;
+              text.appendChild(img);
+            },
+            false
+          );
+          reader.readAsDataURL(files[i]);
+        }
+      },
+      false
+    );
+
     text.focus();
 
     addTweet();
@@ -162,9 +218,14 @@
 </script>
 
 <style lang="scss">
-  textarea {
+  .textarea {
     width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 75px;
+    border: {
+      style: solid;
+      width: 1px;
+    }
   }
   .tweet {
     border: {
@@ -178,7 +239,7 @@
 </style>
 
 <main>
-  <textarea bind:this={text} />
+  <div bind:this={text} class="textarea" contenteditable="true" />
   {#each filters as tweet}
     <div class="tweet">
       <div>
