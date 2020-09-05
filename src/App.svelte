@@ -15,80 +15,144 @@
   let error: String;
   let text: HTMLTextAreaElement;
 
-  // 入力欄値更新時
-  const handleClick = (e: Event): void => {
-    const word = text.value;
-    if ("chrome" in window && "webview" in window["chrome"]) {
-      // WebView2 から呼び出されてるならメッセージ
-      window["chrome"].webview.postMessage(`google:${word}`);
-    } else {
-      // ブラウザからなら通常の新しいウインドウ
-      window.open(`https://www.google.com/search?q=${word}`);
-    }
-    text.value = "";
-  };
+  let consumerKey: string;
+  let consumerSecret: string;
+  let accessTokenKey: string;
+  let accessTokenSecret: string;
+  let threadId: string;
+
+  let client: Twitter;
+  let tweets: any[] = [];
+  let filters: any[] = [];
+  let lastId: string;
 
   // 初期化時
   onMount(async () => {
-    state = _STATE.INIT;
     const url = new URL(location.href);
     const params = url.searchParams;
-    const consumerKey = params.get("consumer_key") ?? "";
-    const consumerSecret = params.get("consumer_secret") ?? "";
+    consumerKey = params.get("consumer_key") ?? "";
+    consumerSecret = params.get("consumer_secret") ?? "";
+    accessTokenKey = params.get("access_token_key") ?? "";
+    accessTokenSecret = params.get("access_token_secret") ?? "";
+    threadId = params.get("thread_id") ?? "";
 
-    if (consumerKey.length == 0 || consumerSecret.length == 0) {
+    if (
+      consumerKey.length == 0 ||
+      consumerSecret.length == 0 ||
+      accessTokenKey.length == 0 ||
+      accessTokenSecret.length == 0
+    ) {
       state = _STATE.ERROR;
-      error = "consumer_key または consumer_secret を URL で指定してください。";
+      error =
+        "consumer_key、consumer_secret、access_token_key または access_token_secretを URL で指定してください。";
+      alert(error);
       return;
     }
 
     // 記録情報で認証
-    const userToken = window.localStorage.getItem("USER_TOKEN") ?? "";
-    const userSecret = window.localStorage.getItem("USER_SECRET") ?? "";
-    let cred = null;
-    if (userToken !== "" && userSecret !== "") {
-      const client = new Twitter({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        access_token_key: userToken,
-        access_token_secret: userSecret,
-      });
-      try {
-        cred = await client.get("account/verify_credentials");
-      } catch (e) {
-        console.error(e);
+    client = new Twitter({
+      consumer_key: consumerKey,
+      consumer_secret: consumerSecret,
+      access_token_key: accessTokenKey,
+      access_token_secret: accessTokenSecret,
+    });
+
+    // Tweet 初期収集
+    let maxId = "";
+    while (true) {
+      const param = { count: 200 };
+      if (maxId !== "") {
+        param["max_id"] = maxId;
+      }
+
+      const adds = await client.get("statuses/user_timeline", param);
+
+      tweets = tweets.concat(adds);
+      if (adds.length < 200) {
+        break;
+      } else {
+        maxId = tweets[tweets.length - 1].id_str;
       }
     }
 
-    if (cred === null) {
-      const client = new Twitter({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-      });
-      const res = await client.getRequestToken("http://callbackurl.com");
-    }
+    // 追加収集関数作成
+    let prevId = 0;
+    let addTweet = async () => {
+      const param = { count: 1 };
+      const adds = await client.get("statuses/user_timeline", param);
+      if (adds.length == 1) {
+        const id = parseInt(adds[0].id_str);
+        console.info(`${id}  ${prevId}`);
+        if (id > prevId) {
+          console.info(0);
+          prevId = id;
+          tweets = adds.concat(tweets);
+        }
+      }
 
-    // 記録情報がNGなら認証
-    // if (result.access_token == null) {
-    //   state = _STATE.REQUIRE;
-    //   client = new Twitter({
-    //     consumer_key: consumerKey,
-    //     consumer_secret: consumerSecret,
-    //   });
-    //   let tokenReponse = await client.getRequestToken("https://google.com");
+      console.info(1);
+      // スレッドが指定されたらそのスレッドの情報だけ取得
+      if (threadId.length > 0) {
+        filters = [];
+        const t = tweets.find((e) => e.id_str == threadId);
+        if (t != null) {
+          filters.push(t);
 
-    //   if (result.access_token == null) {
-    //     state = _STATE.ERROR;
-    //     error = "認証に失敗しました。";
-    //     return;
-    //   }
-    // }
+          // 子を検索
+          let cs = tweets.filter(
+            (e) => t.id_str == e.in_reply_to_status_id_str
+          );
+          while (cs.length > 0) {
+            const c = cs.sort(
+              (a, b) => parseInt(a.id_str) - parseInt(b.id_str)
+            )[0];
+            filters.unshift(c);
+            cs = tweets.filter((e) => c.id_str == e.in_reply_to_status_id_str);
+          }
 
-    // if (userToken == null || userSecret == null) {
-    //   //
-    // }
+          // 親を検索
+          let p = tweets.find((e) => t.in_reply_to_status_id_str == e.id_str);
+          while (p != null) {
+            filters.push(p);
+            p = tweets.find((e) => p.in_reply_to_status_id_str == e.id_str);
+          }
+
+          // コメントするときの親を取得
+          if (filters.length > 0) {
+            lastId = filters[0].id_str;
+          }
+        }
+      } else {
+        console.info(2);
+        filters = tweets;
+      }
+    };
+
+    document.addEventListener("keydown", async function (e) {
+      if (e.code == "Enter" && e.ctrlKey) {
+        e.preventDefault();
+
+        const v = text.value;
+        text.value = "";
+
+        const param = {
+          status: v,
+          auto_populate_reply_metadata: true,
+        };
+
+        if (threadId !== "") {
+          param["in_reply_to_status_id"] = lastId;
+        }
+
+        await client.post("statuses/update", param);
+
+        addTweet();
+      }
+    });
 
     text.focus();
+
+    addTweet();
   });
 
   // WebView2 活性時
@@ -102,16 +166,32 @@
     width: 100%;
     height: 100%;
   }
+  .tweet {
+    border: {
+      style: solid;
+      bottom-width: 1px;
+      top-width: 0px;
+      left-width: 0px;
+      right-width: 0px;
+    }
+  }
 </style>
 
 <main>
-  {#if state == _STATE.ERROR}
-    <div>{error}</div>
-  {:else if state == _STATE.INIT}
-    初期化中
-  {:else if state == _STATE.REQUIRE}
-    <button on:change={handleClick}>認証</button>
-  {:else}
-    <textarea bind:this={text} on:change={handleClick} />
-  {/if}
+  <textarea bind:this={text} />
+  {#each filters as tweet}
+    <div class="tweet">
+      <div>
+        {#each tweet.text.split(/(\n)/) as line}
+          <div>{line}</div>
+        {/each}
+      </div>
+      <div>
+        <a
+          href="?consumer_key={consumerKey}&consumer_secret={consumerSecret}&access_token_key={accessTokenKey}&access_token_secret={accessTokenSecret}&thread_id={tweet.id_str}">
+          &#x25b6;
+        </a>
+      </div>
+    </div>
+  {/each}
 </main>

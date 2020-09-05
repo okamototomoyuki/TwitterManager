@@ -37,15 +37,20 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
     function text(data) {
         return document.createTextNode(data);
     }
-    function listen(node, event, handler, options) {
-        node.addEventListener(event, handler, options);
-        return () => node.removeEventListener(event, handler, options);
+    function space() {
+        return text(' ');
     }
     function attr(node, attribute, value) {
         if (value == null)
@@ -287,19 +292,6 @@ var app = (function () {
         dispatch_dev("SvelteDOMRemove", { node });
         detach(node);
     }
-    function listen_dev(node, event, handler, options, has_prevent_default, has_stop_propagation) {
-        const modifiers = options === true ? ["capture"] : options ? Array.from(Object.keys(options)) : [];
-        if (has_prevent_default)
-            modifiers.push('preventDefault');
-        if (has_stop_propagation)
-            modifiers.push('stopPropagation');
-        dispatch_dev("SvelteDOMAddEventListener", { node, event, handler, modifiers });
-        const dispose = listen(node, event, handler, options);
-        return () => {
-            dispatch_dev("SvelteDOMRemoveEventListener", { node, event, handler, modifiers });
-            dispose();
-        };
-    }
     function attr_dev(node, attribute, value) {
         attr(node, attribute, value);
         if (value == null)
@@ -313,6 +305,15 @@ var app = (function () {
             return;
         dispatch_dev("SvelteDOMSetData", { node: text, data });
         text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -10575,7 +10576,7 @@ var app = (function () {
 
     var defaultEncoding;
     /* istanbul ignore next */
-    {
+var pVersionMajor;     {
       defaultEncoding = 'utf-8';
     }
     var defaultEncoding_1 = defaultEncoding;
@@ -42332,7 +42333,7 @@ var app = (function () {
     var key$3;
 
     for (key$3 in bufferEs6) {
-      if (!bufferEs6.hasOwnProperty(key$3)) continue
+      if (bufferEs6.hasOwnProperty != null && !bufferEs6.hasOwnProperty(key$3)) continue
       if (key$3 === 'SlowBuffer' || key$3 === 'Buffer') continue
       safer[key$3] = bufferEs6[key$3];
     }
@@ -53450,131 +53451,36 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (102:2) {:else}
-    function create_else_block(ctx) {
-    	let textarea;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			textarea = element("textarea");
-    			attr_dev(textarea, "class", "svelte-uwri2g");
-    			add_location(textarea, file, 102, 4, 3094);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, textarea, anchor);
-    			/*textarea_binding*/ ctx[5](textarea);
-
-    			if (!mounted) {
-    				dispose = listen_dev(textarea, "change", /*handleClick*/ ctx[4], false, false, false);
-    				mounted = true;
-    			}
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(textarea);
-    			/*textarea_binding*/ ctx[5](null);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(102:2) {:else}",
-    		ctx
-    	});
-
-    	return block;
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[17] = list[i];
+    	return child_ctx;
     }
 
-    // (100:36) 
-    function create_if_block_2(ctx) {
-    	let button;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			button.textContent = "認証";
-    			add_location(button, file, 100, 4, 3036);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-
-    			if (!mounted) {
-    				dispose = listen_dev(button, "change", /*handleClick*/ ctx[4], false, false, false);
-    				mounted = true;
-    			}
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(100:36) ",
-    		ctx
-    	});
-
-    	return block;
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[14] = list[i];
+    	return child_ctx;
     }
 
-    // (98:33) 
-    function create_if_block_1(ctx) {
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			t = text("初期化中");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(98:33) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (96:2) {#if state == _STATE.ERROR}
-    function create_if_block(ctx) {
+    // (154:8) {#each tweet.text.split(/(\n)/) as line}
+    function create_each_block_1(ctx) {
     	let div;
+    	let t_value = /*line*/ ctx[17] + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			t = text(/*error*/ ctx[2]);
-    			add_location(div, file, 96, 4, 2933);
+    			t = text(t_value);
+    			add_location(div, file, 154, 10, 4774);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     			append_dev(div, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*error*/ 4) set_data_dev(t, /*error*/ ctx[2]);
+    			if (dirty & /*filters*/ 32 && t_value !== (t_value = /*line*/ ctx[17] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -53583,9 +53489,108 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
-    		type: "if",
-    		source: "(96:2) {#if state == _STATE.ERROR}",
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(154:8) {#each tweet.text.split(/(\\n)/) as line}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (151:2) {#each filters as tweet}
+    function create_each_block(ctx) {
+    	let div2;
+    	let div0;
+    	let t0;
+    	let div1;
+    	let a;
+    	let t1;
+    	let a_href_value;
+    	let t2;
+    	let each_value_1 = /*tweet*/ ctx[14].text.split(/(\n)/);
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div2 = element("div");
+    			div0 = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t0 = space();
+    			div1 = element("div");
+    			a = element("a");
+    			t1 = text("▶");
+    			t2 = space();
+    			add_location(div0, file, 152, 6, 4709);
+    			attr_dev(a, "href", a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str);
+    			add_location(a, file, 158, 8, 4841);
+    			add_location(div1, file, 157, 6, 4827);
+    			attr_dev(div2, "class", "tweet svelte-1yrolg1");
+    			add_location(div2, file, 151, 4, 4683);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, div0);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div0, null);
+    			}
+
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, a);
+    			append_dev(a, t1);
+    			append_dev(div2, t2);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*filters*/ 32) {
+    				each_value_1 = /*tweet*/ ctx[14].text.split(/(\n)/);
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters*/ 62 && a_href_value !== (a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str)) {
+    				attr_dev(a, "href", a_href_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div2);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(151:2) {#each filters as tweet}",
     		ctx
     	});
 
@@ -53594,48 +53599,74 @@ var app = (function () {
 
     function create_fragment(ctx) {
     	let main;
+    	let textarea;
+    	let t;
+    	let each_value = /*filters*/ ctx[5];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
 
-    	function select_block_type(ctx, dirty) {
-    		if (/*state*/ ctx[1] == /*_STATE*/ ctx[0].ERROR) return create_if_block;
-    		if (/*state*/ ctx[1] == /*_STATE*/ ctx[0].INIT) return create_if_block_1;
-    		if (/*state*/ ctx[1] == /*_STATE*/ ctx[0].REQUIRE) return create_if_block_2;
-    		return create_else_block;
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
 
     	const block = {
     		c: function create() {
     			main = element("main");
-    			if_block.c();
-    			add_location(main, file, 94, 0, 2892);
+    			textarea = element("textarea");
+    			t = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(textarea, "class", "svelte-1yrolg1");
+    			add_location(textarea, file, 149, 2, 4622);
+    			add_location(main, file, 148, 0, 4613);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
-    			if_block.m(main, null);
+    			append_dev(main, textarea);
+    			/*textarea_binding*/ ctx[6](textarea);
+    			append_dev(main, t);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(main, null);
+    			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
+    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters*/ 62) {
+    				each_value = /*filters*/ ctx[5];
+    				validate_each_argument(each_value);
+    				let i;
 
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(main, null);
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(main, null);
+    					}
     				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
-    			if_block.d();
+    			/*textarea_binding*/ ctx[6](null);
+    			destroy_each(each_blocks, detaching);
     		}
     	};
 
@@ -53664,84 +53695,139 @@ var app = (function () {
     	let state;
     	let error;
     	let text;
-
-    	// 入力欄値更新時
-    	const handleClick = e => {
-    		const word = text.value;
-
-    		if ("chrome" in window && "webview" in window["chrome"]) {
-    			// WebView2 から呼び出されてるならメッセージ
-    			window["chrome"].webview.postMessage(`google:${word}`);
-    		} else {
-    			// ブラウザからなら通常の新しいウインドウ
-    			window.open(`https://www.google.com/search?q=${word}`);
-    		}
-
-    		$$invalidate(3, text.value = "", text);
-    	};
+    	let consumerKey;
+    	let consumerSecret;
+    	let accessTokenKey;
+    	let accessTokenSecret;
+    	let threadId;
+    	let client;
+    	let tweets = [];
+    	let filters = [];
+    	let lastId;
 
     	// 初期化時
     	onMount(async () => {
-    		$$invalidate(1, state = _STATE.INIT);
     		const url = new URL(location.href);
     		const params = url.searchParams;
-    		const consumerKey = params.get("consumer_key") ?? "";
-    		const consumerSecret = params.get("consumer_secret") ?? "";
+    		$$invalidate(1, consumerKey = params.get("consumer_key") ?? "");
+    		$$invalidate(2, consumerSecret = params.get("consumer_secret") ?? "");
+    		$$invalidate(3, accessTokenKey = params.get("access_token_key") ?? "");
+    		$$invalidate(4, accessTokenSecret = params.get("access_token_secret") ?? "");
+    		threadId = params.get("thread_id") ?? "";
 
-    		if (consumerKey.length == 0 || consumerSecret.length == 0) {
-    			$$invalidate(1, state = _STATE.ERROR);
-    			$$invalidate(2, error = "consumer_key または consumer_secret を URL で指定してください。");
+    		if (consumerKey.length == 0 || consumerSecret.length == 0 || accessTokenKey.length == 0 || accessTokenSecret.length == 0) {
+    			state = _STATE.ERROR;
+    			error = "consumer_key、consumer_secret、access_token_key または access_token_secretを URL で指定してください。";
+    			alert(error);
     			return;
     		}
 
     		// 記録情報で認証
-    		const userToken = window.localStorage.getItem("USER_TOKEN") ?? "";
+    		client = new twitter_m({
+    				consumer_key: consumerKey,
+    				consumer_secret: consumerSecret,
+    				access_token_key: accessTokenKey,
+    				access_token_secret: accessTokenSecret
+    			});
 
-    		const userSecret = window.localStorage.getItem("USER_SECRET") ?? "";
-    		let cred = null;
+    		// Tweet 初期収集
+    		let maxId = "";
 
-    		if (userToken !== "" && userSecret !== "") {
-    			const client = new twitter_m({
-    					consumer_key: consumerKey,
-    					consumer_secret: consumerSecret,
-    					access_token_key: userToken,
-    					access_token_secret: userSecret
-    				});
+    		while (true) {
+    			const param = { count: 200 };
 
-    			try {
-    				cred = await client.get("account/verify_credentials");
-    			} catch(e) {
-    				console.error(e);
+    			if (maxId !== "") {
+    				param["max_id"] = maxId;
+    			}
+
+    			const adds = await client.get("statuses/user_timeline", param);
+    			tweets = tweets.concat(adds);
+
+    			if (adds.length < 200) {
+    				break;
+    			} else {
+    				maxId = tweets[tweets.length - 1].id_str;
     			}
     		}
 
-    		if (cred === null) {
-    			const client = new twitter_m({
-    					consumer_key: consumerKey,
-    					consumer_secret: consumerSecret
-    				});
+    		// 追加収集関数作成
+    		let prevId = 0;
 
-    			const res = await client.getRequestToken("http://callbackurl.com");
-    		}
+    		let addTweet = async () => {
+    			const param = { count: 1 };
+    			const adds = await client.get("statuses/user_timeline", param);
 
-    		// 記録情報がNGなら認証
-    		// if (result.access_token == null) {
-    		//   state = _STATE.REQUIRE;
-    		//   client = new Twitter({
-    		//     consumer_key: consumerKey,
-    		//     consumer_secret: consumerSecret,
-    		//   });
-    		//   let tokenReponse = await client.getRequestToken("https://google.com");
-    		//   if (result.access_token == null) {
-    		//     state = _STATE.ERROR;
-    		//     error = "認証に失敗しました。";
-    		//     return;
-    		//   }
-    		// }
-    		// if (userToken == null || userSecret == null) {
-    		//   //
-    		// }
+    			if (adds.length == 1) {
+    				const id = parseInt(adds[0].id_str);
+    				console.info(`${id}  ${prevId}`);
+
+    				if (id > prevId) {
+    					console.info(0);
+    					prevId = id;
+    					tweets = adds.concat(tweets);
+    				}
+    			}
+
+    			console.info(1);
+
+    			// スレッドが指定されたらそのスレッドの情報だけ取得
+    			if (threadId.length > 0) {
+    				$$invalidate(5, filters = []);
+    				const t = tweets.find(e => e.id_str == threadId);
+
+    				if (t != null) {
+    					filters.push(t);
+
+    					// 子を検索
+    					let cs = tweets.filter(e => t.id_str == e.in_reply_to_status_id_str);
+
+    					while (cs.length > 0) {
+    						const c = cs.sort((a, b) => parseInt(a.id_str) - parseInt(b.id_str))[0];
+    						filters.unshift(c);
+    						cs = tweets.filter(e => c.id_str == e.in_reply_to_status_id_str);
+    					}
+
+    					// 親を検索
+    					let p = tweets.find(e => t.in_reply_to_status_id_str == e.id_str);
+
+    					while (p != null) {
+    						filters.push(p);
+    						p = tweets.find(e => p.in_reply_to_status_id_str == e.id_str);
+    					}
+
+    					// コメントするときの親を取得
+    					if (filters.length > 0) {
+    						lastId = filters[0].id_str;
+    					}
+    				}
+    			} else {
+    				console.info(2);
+    				$$invalidate(5, filters = tweets);
+    			}
+    		};
+
+    		document.addEventListener("keydown", async function (e) {
+    			if (e.code == "Enter" && e.ctrlKey) {
+    				e.preventDefault();
+    				const v = text.value;
+    				$$invalidate(0, text.value = "", text);
+
+    				const param = {
+    					status: v,
+    					auto_populate_reply_metadata: true
+    				};
+
+    				if (threadId !== "") {
+    					param["in_reply_to_status_id"] = lastId;
+    				}
+
+    				await client.post("statuses/update", param);
+    				addTweet();
+    			}
+    		});
+
     		text.focus();
+    		addTweet();
     	});
 
     	// WebView2 活性時
@@ -53761,7 +53847,7 @@ var app = (function () {
     	function textarea_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
     			text = $$value;
-    			$$invalidate(3, text);
+    			$$invalidate(0, text);
     		});
     	}
 
@@ -53773,21 +53859,46 @@ var app = (function () {
     		state,
     		error,
     		text,
-    		handleClick
+    		consumerKey,
+    		consumerSecret,
+    		accessTokenKey,
+    		accessTokenSecret,
+    		threadId,
+    		client,
+    		tweets,
+    		filters,
+    		lastId
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("_STATE" in $$props) $$invalidate(0, _STATE = $$props._STATE);
-    		if ("state" in $$props) $$invalidate(1, state = $$props.state);
-    		if ("error" in $$props) $$invalidate(2, error = $$props.error);
-    		if ("text" in $$props) $$invalidate(3, text = $$props.text);
+    		if ("_STATE" in $$props) _STATE = $$props._STATE;
+    		if ("state" in $$props) state = $$props.state;
+    		if ("error" in $$props) error = $$props.error;
+    		if ("text" in $$props) $$invalidate(0, text = $$props.text);
+    		if ("consumerKey" in $$props) $$invalidate(1, consumerKey = $$props.consumerKey);
+    		if ("consumerSecret" in $$props) $$invalidate(2, consumerSecret = $$props.consumerSecret);
+    		if ("accessTokenKey" in $$props) $$invalidate(3, accessTokenKey = $$props.accessTokenKey);
+    		if ("accessTokenSecret" in $$props) $$invalidate(4, accessTokenSecret = $$props.accessTokenSecret);
+    		if ("threadId" in $$props) threadId = $$props.threadId;
+    		if ("client" in $$props) client = $$props.client;
+    		if ("tweets" in $$props) tweets = $$props.tweets;
+    		if ("filters" in $$props) $$invalidate(5, filters = $$props.filters);
+    		if ("lastId" in $$props) lastId = $$props.lastId;
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [_STATE, state, error, text, handleClick, textarea_binding];
+    	return [
+    		text,
+    		consumerKey,
+    		consumerSecret,
+    		accessTokenKey,
+    		accessTokenSecret,
+    		filters,
+    		textarea_binding
+    	];
     }
 
     class App extends SvelteComponentDev {
