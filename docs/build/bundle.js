@@ -53480,7 +53480,7 @@ var pVersionMajor;     {
     			append_dev(div, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*filters*/ 32 && t_value !== (t_value = /*line*/ ctx[17] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*filters*/ 64 && t_value !== (t_value = /*line*/ ctx[17] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -53498,16 +53498,54 @@ var pVersionMajor;     {
     	return block;
     }
 
+    // (202:6) {#if threadId.length == 0}
+    function create_if_block(ctx) {
+    	let div;
+    	let a;
+    	let t;
+    	let a_href_value;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			a = element("a");
+    			t = text("▶");
+    			attr_dev(a, "href", a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str);
+    			add_location(a, file, 203, 10, 6536);
+    			add_location(div, file, 202, 8, 6520);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, a);
+    			append_dev(a, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters*/ 94 && a_href_value !== (a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str)) {
+    				attr_dev(a, "href", a_href_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(202:6) {#if threadId.length == 0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     // (195:2) {#each filters as tweet}
     function create_each_block(ctx) {
-    	let div2;
+    	let div1;
     	let div0;
     	let t0;
-    	let div1;
-    	let a;
     	let t1;
-    	let a_href_value;
-    	let t2;
     	let each_value_1 = /*tweet*/ ctx[14].text.split(/(\n)/);
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
@@ -53516,9 +53554,11 @@ var pVersionMajor;     {
     		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
     	}
 
+    	let if_block = /*threadId*/ ctx[5].length == 0 && create_if_block(ctx);
+
     	const block = {
     		c: function create() {
-    			div2 = element("div");
+    			div1 = element("div");
     			div0 = element("div");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -53526,33 +53566,26 @@ var pVersionMajor;     {
     			}
 
     			t0 = space();
-    			div1 = element("div");
-    			a = element("a");
-    			t1 = text("▶");
-    			t2 = space();
+    			if (if_block) if_block.c();
+    			t1 = space();
     			add_location(div0, file, 196, 6, 6367);
-    			attr_dev(a, "href", a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str);
-    			add_location(a, file, 202, 8, 6499);
-    			add_location(div1, file, 201, 6, 6485);
-    			attr_dev(div2, "class", "tweet svelte-1e5k84m");
-    			add_location(div2, file, 195, 4, 6341);
+    			attr_dev(div1, "class", "tweet svelte-1e5k84m");
+    			add_location(div1, file, 195, 4, 6341);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, div0);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div0, null);
     			}
 
-    			append_dev(div2, t0);
-    			append_dev(div2, div1);
-    			append_dev(div1, a);
-    			append_dev(a, t1);
-    			append_dev(div2, t2);
+    			append_dev(div1, t0);
+    			if (if_block) if_block.m(div1, null);
+    			append_dev(div1, t1);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*filters*/ 32) {
+    			if (dirty & /*filters*/ 64) {
     				each_value_1 = /*tweet*/ ctx[14].text.split(/(\n)/);
     				validate_each_argument(each_value_1);
     				let i;
@@ -53576,13 +53609,23 @@ var pVersionMajor;     {
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters*/ 62 && a_href_value !== (a_href_value = "?consumer_key=" + /*consumerKey*/ ctx[1] + "&consumer_secret=" + /*consumerSecret*/ ctx[2] + "&access_token_key=" + /*accessTokenKey*/ ctx[3] + "&access_token_secret=" + /*accessTokenSecret*/ ctx[4] + "&thread_id=" + /*tweet*/ ctx[14].id_str)) {
-    				attr_dev(a, "href", a_href_value);
+    			if (/*threadId*/ ctx[5].length == 0) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					if_block.m(div1, t1);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
+    			if (detaching) detach_dev(div1);
     			destroy_each(each_blocks, detaching);
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -53601,7 +53644,7 @@ var pVersionMajor;     {
     	let main;
     	let div;
     	let t;
-    	let each_value = /*filters*/ ctx[5];
+    	let each_value = /*filters*/ ctx[6];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -53630,7 +53673,7 @@ var pVersionMajor;     {
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
     			append_dev(main, div);
-    			/*div_binding*/ ctx[6](div);
+    			/*div_binding*/ ctx[7](div);
     			append_dev(main, t);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -53638,8 +53681,8 @@ var pVersionMajor;     {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters*/ 62) {
-    				each_value = /*filters*/ ctx[5];
+    			if (dirty & /*consumerKey, consumerSecret, accessTokenKey, accessTokenSecret, filters, threadId*/ 126) {
+    				each_value = /*filters*/ ctx[6];
     				validate_each_argument(each_value);
     				let i;
 
@@ -53666,7 +53709,7 @@ var pVersionMajor;     {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
-    			/*div_binding*/ ctx[6](null);
+    			/*div_binding*/ ctx[7](null);
     			destroy_each(each_blocks, detaching);
     		}
     	};
@@ -53714,7 +53757,7 @@ var pVersionMajor;     {
     		$$invalidate(2, consumerSecret = params.get("consumer_secret") ?? "");
     		$$invalidate(3, accessTokenKey = params.get("access_token_key") ?? "");
     		$$invalidate(4, accessTokenSecret = params.get("access_token_secret") ?? "");
-    		threadId = params.get("thread_id") ?? "";
+    		$$invalidate(5, threadId = params.get("thread_id") ?? "");
 
     		if (consumerKey.length == 0 || consumerSecret.length == 0 || accessTokenKey.length == 0 || accessTokenSecret.length == 0) {
     			state = _STATE.ERROR;
@@ -53773,7 +53816,7 @@ var pVersionMajor;     {
 
     			// スレッドが指定されたらそのスレッドの情報だけ取得
     			if (threadId.length > 0) {
-    				$$invalidate(5, filters = []);
+    				$$invalidate(6, filters = []);
     				const t = tweets.find(e => e.id_str == threadId);
 
     				if (t != null) {
@@ -53802,7 +53845,7 @@ var pVersionMajor;     {
     					}
     				}
     			} else {
-    				$$invalidate(5, filters = tweets);
+    				$$invalidate(6, filters = tweets);
     			}
     		};
 
@@ -53943,10 +53986,10 @@ var pVersionMajor;     {
     		if ("consumerSecret" in $$props) $$invalidate(2, consumerSecret = $$props.consumerSecret);
     		if ("accessTokenKey" in $$props) $$invalidate(3, accessTokenKey = $$props.accessTokenKey);
     		if ("accessTokenSecret" in $$props) $$invalidate(4, accessTokenSecret = $$props.accessTokenSecret);
-    		if ("threadId" in $$props) threadId = $$props.threadId;
+    		if ("threadId" in $$props) $$invalidate(5, threadId = $$props.threadId);
     		if ("client" in $$props) client = $$props.client;
     		if ("tweets" in $$props) tweets = $$props.tweets;
-    		if ("filters" in $$props) $$invalidate(5, filters = $$props.filters);
+    		if ("filters" in $$props) $$invalidate(6, filters = $$props.filters);
     		if ("lastId" in $$props) lastId = $$props.lastId;
     	};
 
@@ -53960,6 +54003,7 @@ var pVersionMajor;     {
     		consumerSecret,
     		accessTokenKey,
     		accessTokenSecret,
+    		threadId,
     		filters,
     		div_binding
     	];

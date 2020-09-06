@@ -247,12 +247,14 @@
           <div>{line}</div>
         {/each}
       </div>
-      <div>
-        <a
-          href="?consumer_key={consumerKey}&consumer_secret={consumerSecret}&access_token_key={accessTokenKey}&access_token_secret={accessTokenSecret}&thread_id={tweet.id_str}">
-          &#x25b6;
-        </a>
-      </div>
+      {#if threadId.length == 0}
+        <div>
+          <a
+            href="?consumer_key={consumerKey}&consumer_secret={consumerSecret}&access_token_key={accessTokenKey}&access_token_secret={accessTokenSecret}&thread_id={tweet.id_str}">
+            &#x25b6;
+          </a>
+        </div>
+      {/if}
     </div>
   {/each}
 </main>
